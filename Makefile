@@ -23,7 +23,7 @@ OBJS         := $(patsubst %.cc,%.o,$(SRCS))
 # DEBUG        := -g
 CXX          := g++
 LD           := g++
-CXXFLAGS     := $(DEBUG) -Wall -fPIC -std=c++11 -DUSE_HSIO -D_REENTRANT -D_GNU_SOURCE
+CXXFLAGS     := $(DEBUG) -Wall -fPIC -std=c++11
 LDFLAGS      := $(DEBUG)
 SOFLAGS      := -shared
 # SYSLIBS      := -lboost_thread -lpcap
