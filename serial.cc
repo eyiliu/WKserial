@@ -134,7 +134,7 @@ int WKserial::get_speed(){
 }
 
 
-void WKserial::set_hardware_flow_confrol(int ison){
+void WKserial::set_hardware_flow_control(int ison){
   // RS-232 signal lines CTS/RTS 
   struct termios   options;
   tcgetattr(fd, &options); 

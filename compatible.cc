@@ -9,7 +9,7 @@ TempInterlock::TempInterlock(std::string devpath)
   connect();
   set_endline("\r");
   set_speed(115200);
-  set_hardware_flow_confrol(0);
+  set_hardware_flow_control(0);
   set_software_flow_control(0);
   set_raw_output(1);
   set_raw_intput(1);
@@ -69,7 +69,7 @@ Chiller_Medingen_C20::Chiller_Medingen_C20(std::string devpath)
   connect();
   set_endline("\r\n");
   set_speed(9600);
-  set_hardware_flow_confrol(0);
+  set_hardware_flow_control(0);
   set_software_flow_control(0);
   set_raw_output(1);
   set_raw_intput(1);
@@ -114,7 +114,7 @@ Keithley2410::Keithley2410(std::string devpath)
   connect();
   set_endline("\n");
   set_speed(57600);
-  set_hardware_flow_confrol(0);
+  set_hardware_flow_control(0);
   set_software_flow_control(0);
   set_raw_output(1);
   set_raw_intput(1);
@@ -238,7 +238,7 @@ tti_CPX400::tti_CPX400(std::string devpath)
   connect();
   set_endline("\n");
   set_speed(9600);
-  set_hardware_flow_confrol(0);
+  set_hardware_flow_control(0);
   set_software_flow_control(0);
   set_raw_output(1);
   set_raw_intput(1);

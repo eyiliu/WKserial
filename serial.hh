@@ -19,7 +19,7 @@ public:
   void set_read_timeout_msec(int msec); //milli sec  
   void set_endline(std::string el);
   void set_speed(int speed);
-  void set_hardware_flow_confrol(int ison);
+  void set_hardware_flow_control(int ison);
   void set_software_flow_control(int ison);
   void set_raw_output(int israw);
   void set_raw_intput(int israw);
