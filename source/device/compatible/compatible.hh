@@ -6,7 +6,7 @@
 
 #include <time.h>
 
-#include "serial.hh"
+#include "WKserial.hh"
 
 class TempInterlock:public WKserial{
 public:
