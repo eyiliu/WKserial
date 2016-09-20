@@ -2,6 +2,7 @@
 #define WKSERIAL_HH
 
 #include <string>
+#include <vector>
 
 #include <time.h>
 

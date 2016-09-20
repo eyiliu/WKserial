@@ -1,6 +1,9 @@
 #ifndef CAMERAIR_HH
 #define CAMERAIR_HH
 
+#include "WKserial.hh"
+
+
 #define KEY_S_LONG    "2,2B,4B"
 #define KEY_S_SHORT   "2,2B,8B"
 #define KEY_A_LONG    "2,27,47"
@@ -31,11 +34,11 @@ public:
   void AutoImage(){};
   void Focus(){};
   void Calibrate(){};
-  double GetCameraTemp(){};
+  double GetCameraTemp();
 private:
   
 
-}
+};
 
 
 
