@@ -12,8 +12,7 @@
 #include <sstream>
 #include <vector>
 
-#include "serial.hh"
-
+#include "WKserial.hh"
 
 WKserial::WKserial(std::string name):
   fd(0),devname(name), endline("\n"),
