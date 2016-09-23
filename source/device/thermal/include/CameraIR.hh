@@ -30,13 +30,39 @@
 class CameraIR: public WKserial{
 public:
   CameraIR(std::string devpath);
-  void AutoFocus(){};
-  void AutoImage(){};
-  void Focus(){};
-  void Calibrate(){};
-  double GetCameraTemp();
+  double GetTemp();
+  void SetAirAbsorb(double v);
+  void SetAirTransmission(double v);
+  void SetDistance(double v);
+  void SetPathTemp(double v);
+  void SetEnvTemp(double v);
+  void SetEmissivity(double v);
+  void SetVisLevel(double v);
+  void SetVisRange(double v);
+  void SetFocusSteps(uint32_t v);
+  void SetFocus(uint32_t v);
+  void StopFocus();
+  void SetShutter(bool b);
+  void SetAutoFocus(bool b);
+  void SetFreeze(bool b);
+  void SetAutoImage(uint32_t v);
+  void LoadCalib(uint32_t v);
+  void Key_left();
+  void Key_right();
+  void Key_up();
+  void Key_down();
+  void Key_s();
+  void Key_a();
+  void Key_t();
+  void Key_s_long();
+  void Key_a_long();
+  void Key_t_long();
+
+  void TakePhoto();
+
+  void SendCmd(std::string cmd);
 private:
-  
+  void SendKey(std::string k);
 
 };
 
