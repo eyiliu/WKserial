@@ -1,8 +1,11 @@
 
 #include "NanotecMotor.hh"
-#include <boost/lexical_cast.hpp>
 
 #include <iostream>
+#include <string>
+
+#include <string.h>
+#include <math.h>
 
 //! Macro for throwing an exception with a message, passing args
 #define NANOTEC_EXCEPT(except, msg, ...) \
@@ -37,6 +40,7 @@ bool nanotec::NanotecMotor::sendCommand(std::string & message, std::string & rep
   write_data(head+message);
   read_data(reply, 100);
   if(!reply.empty()){
+    // std::cout<<"the end "<<(uint32_t)(*(reply.end()-1))<<std::endl;
     *(reply.end()-1)='\r'; 
   }
   return true;
@@ -48,7 +52,7 @@ void nanotec::NanotecMotor::sender(std::string symbol)
     std::string command;
     std::string reply;
 
-    command = boost::lexical_cast<std::string>(id_) + symbol + "\r";
+    command = std::to_string(id_) + symbol + "\r";
 
     if( !sendCommand(command, reply) )
         NANOTEC_EXCEPT(nanotec::Exception, "Failed to send command: %s. %s (errno = %d).", command.c_str(), strerror(errno), errno);
@@ -61,13 +65,13 @@ void nanotec::NanotecMotor::setter(std::string symbol, int value, int min_value,
 {
   if(value < min_value || value > max_value){
     std::cout<< min_value <<"  "<<max_value<<"  "<<value<<std::endl;
-        NANOTEC_EXCEPT(nanotec::Exception, "yiliu::Value is out of bounds: %d. %s (errno = %d).", value, strerror(errno), errno);
+    NANOTEC_EXCEPT(nanotec::Exception, "Value is out of bounds: %d. %s (errno = %d).", value, strerror(errno), errno);
   }
   
     std::string command;
     std::string reply;
 
-    command = boost::lexical_cast<std::string>(id_) + symbol + "=" + boost::lexical_cast<std::string>(value) + "\r";
+    command = std::to_string(id_) + symbol + "=" + std::to_string(value) + "\r";
 
     if( !sendCommand(command, reply) )
        NANOTEC_EXCEPT(nanotec::Exception, "Failed to send command: %s. %s (errno = %d).", command.c_str(), strerror(errno), errno);
@@ -75,13 +79,13 @@ void nanotec::NanotecMotor::setter(std::string symbol, int value, int min_value,
     std::size_t found = reply.find_first_of("=");
     if(found == std::string::npos)
     {
-        command = boost::lexical_cast<std::string>(id_) + symbol + boost::lexical_cast<std::string>(value) + "\r";
+        command = std::to_string(id_) + symbol + std::to_string(value) + "\r";
     }
 
     if(command.compare(reply) != 0){
       std::cout<<command.size()<< "command =="<<"="<<(uint)(command[6])<<std::endl;
       std::cout<<reply.size()<< "reply =="<<"="<<(uint)(reply[6])<<std::endl;
-      NANOTEC_EXCEPT(nanotec::Exception, "yiliu::Failed to assert reply: %s. %s (errno = %d).", reply.c_str(), strerror(errno), errno);
+      NANOTEC_EXCEPT(nanotec::Exception, "Failed to assert reply: %s. %s (errno = %d).", reply.c_str(), strerror(errno), errno);
     }
 }
 
@@ -102,7 +106,7 @@ void nanotec::NanotecMotor::setter(std::string symbol, int value, int * array_of
     std::string command;
     std::string reply;
 
-    command = boost::lexical_cast<std::string>(id_) + symbol + "=" + boost::lexical_cast<std::string>(value) + "\r";
+    command = std::to_string(id_) + symbol + "=" + std::to_string(value) + "\r";
 
     if( !sendCommand(command, reply) )
         NANOTEC_EXCEPT(nanotec::Exception, "Failed to send command: %s. %s (errno = %d).", command.c_str(), strerror(errno), errno);
@@ -110,7 +114,7 @@ void nanotec::NanotecMotor::setter(std::string symbol, int value, int * array_of
     std::size_t found = reply.find_first_of("=");
     if(found == std::string::npos)
     {
-        command = boost::lexical_cast<std::string>(id_) + symbol + boost::lexical_cast<std::string>(value) + "\r";
+        command = std::to_string(id_) + symbol + std::to_string(value) + "\r";
     }
 
     if(command.compare(reply) != 0)
@@ -123,7 +127,7 @@ int nanotec::NanotecMotor::getter(std::string symbol)
     std::string reply;
     int value;
 
-    command = boost::lexical_cast<std::string>(id_);
+    command = std::to_string(id_);
     if(symbol.length() == 1) command += "Z" + symbol + "\r";
     else command += symbol + "\r";
 
@@ -138,9 +142,9 @@ int nanotec::NanotecMotor::getter(std::string symbol)
         reply.erase(reply.begin(), reply.begin()+i);
     }
 
-    if(symbol.compare("$") == 0) command = boost::lexical_cast<std::string>(id_) + symbol + "%d" + "\r";
-    else if(symbol.length() == 1) command = boost::lexical_cast<std::string>(id_) + "Z" + symbol + "%d" + "\r";
-    else command = boost::lexical_cast<std::string>(id_) + symbol + "%d\r";
+    if(symbol.compare("$") == 0) command = std::to_string(id_) + symbol + "%d" + "\r";
+    else if(symbol.length() == 1) command = std::to_string(id_) + "Z" + symbol + "%d" + "\r";
+    else command = std::to_string(id_) + symbol + "%d\r";
 
     if( sscanf(reply.c_str(), command.c_str(), &value) != 1)
         NANOTEC_EXCEPT(nanotec::Exception, "Failed to assert reply: %s. %s (errno = %d).", reply.c_str(), strerror(errno), errno);
@@ -331,7 +335,7 @@ int nanotec::NanotecMotor::getErrorMemory(int location)
     std::string reply;
     int error;
 
-    command = boost::lexical_cast<std::string>(id_) + "Z" + boost::lexical_cast<std::string>(location) + "E";
+    command = std::to_string(id_) + "Z" + std::to_string(location) + "E";
 
     if( !sendCommand(command, reply) )
         NANOTEC_EXCEPT(nanotec::Exception, "Failed to send command: %s. %s (errno = %d).", command.c_str(), strerror(errno), errno);
@@ -372,7 +376,7 @@ void nanotec::NanotecMotor::getFirmwareVersion(std::string & version)
 {
     std::string command;
 
-    command = boost::lexical_cast<std::string>(id_) + "v";
+    command = std::to_string(id_) + "v";
 
     if( !sendCommand(command, version) )
         NANOTEC_EXCEPT(nanotec::Exception, "Failed to send command: %s. %s (errno = %d).", command.c_str(), strerror(errno), errno);
@@ -524,7 +528,7 @@ int nanotec::NanotecMotor::readEEPROM(int address)
     std::string reply;
     int data;
 
-    command = boost::lexical_cast<std::string>(id_) + "(E" + boost::lexical_cast<std::string>(address);
+    command = std::to_string(id_) + "(E" + std::to_string(address);
 
     if( !sendCommand(command, reply) )
         NANOTEC_EXCEPT(nanotec::Exception, "Failed to send command: %s. %s (errno = %d).", command.c_str(), strerror(errno), errno);
@@ -556,12 +560,12 @@ void nanotec::NanotecMotor::startBootloader()
     std::string command;
     std::string reply;
 
-    command = boost::lexical_cast<std::string>(id_) + "@S";
+    command = std::to_string(id_) + "@S";
 
     if( !sendCommand(command, reply) )
         NANOTEC_EXCEPT(nanotec::Exception, "Failed to send command: %s. %s (errno = %d).", command.c_str(), strerror(errno), errno);
 
-    command = boost::lexical_cast<std::string>(id_) + "@OK";
+    command = std::to_string(id_) + "@OK";
     if(command.compare(reply) != 0)
         NANOTEC_EXCEPT(nanotec::Exception, "Failed to assert reply: %s. %s (errno = %d).", reply.c_str(), strerror(errno), errno);
 }
@@ -695,16 +699,16 @@ void nanotec::NanotecMotor::readOutCurrentRecord(nanotec::NanotecRecord & record
     std::string command;
     std::string reply;
 
-    command = boost::lexical_cast<std::string>(id_);
+    command = std::to_string(id_);
     if(record_index == 0) command += "Z|";
-    else command += "Z" + boost::lexical_cast<std::string>(record_index) + "|";
+    else command += "Z" + std::to_string(record_index) + "|";
 
     if( !sendCommand(command, reply) )
         NANOTEC_EXCEPT(nanotec::Exception, "Failed to send command: %s. %s (errno = %d).", command.c_str(), strerror(errno), errno);
 
-    command = boost::lexical_cast<std::string>(id_);
+    command = std::to_string(id_);
     if(record_index == 0) command += "Z";
-    else command += "Z" + boost::lexical_cast<std::string>(record_index);
+    else command += "Z" + std::to_string(record_index);
     command += "p%ds%du%do%dn%db%dB%dd%dt%dW%dP%dN%d:b%d:B%d";
 
     if(sscanf(reply.c_str(), command.c_str(),   &record.position_mode,
