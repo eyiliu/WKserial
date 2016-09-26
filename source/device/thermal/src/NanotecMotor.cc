@@ -372,6 +372,7 @@ void nanotec::NanotecMotor::getStatus(NanotecStatus & status)
     status.input_1 = (((buffer >> 3) & 0x01) == 1);
 }
 
+
 void nanotec::NanotecMotor::getFirmwareVersion(std::string & version)
 {
     std::string command;
@@ -895,5 +896,35 @@ int nanotec::NanotecMotor::getInterpolationTimePeriod()
 {
     return getter(":clocl_interp");
 }
+
+
+
+bool nanotec::NanotecMotor::isStatusReady(){
+  NanotecStatus st;
+  getStatus(st);
+  if(st.controller_ready)
+    return true;
+  else
+    return false;
+}
+
+bool nanotec::NanotecMotor::isStatusZeroPos(){
+  NanotecStatus st;
+  getStatus(st);
+  if(st.zero_position_reached)
+    return true;
+  else
+    return false;
+}
+
+bool nanotec::NanotecMotor::isStatusErrorPos(){
+  NanotecStatus st;
+  getStatus(st);
+  if(st.position_error)
+    return true;
+  else
+    return false;
+}
+
 
 // EOF

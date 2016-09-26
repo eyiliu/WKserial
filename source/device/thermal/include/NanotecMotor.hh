@@ -120,6 +120,7 @@ Y axis: MOtorID 1; external siwtch down port_in_f, up  port_in_e
 #define NANOTEC_DIRECTION_LEFT    0
 #define NANOTEC_DIRECTION_RIGHT   1
 
+
 namespace nanotec
 {
   
@@ -1583,41 +1584,16 @@ namespace nanotec
         */
         int getInterpolationTimePeriod();
 
-        //! ********************* Commands for JAVA program *********************
-        //! Note: Not implemented.
-
-        //! ********************* Closed loop settings *********************
-
-        // TODO...
-
-        //! ********************* Motor dependent load angle values determined by test runs for the closed loop mode *********************
-        //! Note: Not necessary, can be accessed using NanoPro.
-
-        //! ********************* Scope mode *********************
-        //! Note: Not implemented, used by the NanoPro software.
-
-        //! ********************* Configuration of the current controller for controllers with dspDrive *********************
-
-        // TODO...
-
-    private:
-        //! Send a command to the motor
-        /*!
-        *  The default function to send and receive data.
-        *
-        *  \param message    		Array of chars to send.
-        *  \param message_size		Size of the message buffer.
-        *  \param reply             Array of chars replied by the motor.
-        *  \param reply_size		Size of the reply buffer.
-        *
-        *  \return True if successful false if anything went wrong!
-        */
+    bool isStatusReady();
+    bool isStatusZeroPos();
+    bool isStatusErrorPos();
+    
+    
+  private:
         bool sendCommand(std::string & message, std::string & reply);
-
         bool echo_;
-
         unsigned int id_;
-    };
+  };
 }
 
 #endif

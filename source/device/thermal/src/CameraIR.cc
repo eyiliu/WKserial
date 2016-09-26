@@ -152,9 +152,6 @@ void CameraIR::SetAutoFocus(bool b){
   read_data(str, 100);
 }
 
-
-
-
 void CameraIR::SetFreeze(bool b){
   std::string cmd;
   if(b)

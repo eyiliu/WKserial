@@ -9,10 +9,12 @@
 
 
 #pragma link C++ class CameraIR;
-// #pragma link C++ class MotorNanotec;
 #pragma link C++ namespace nanotec;
 #pragma link C++ defined_in namespace nanotec;
 
 #pragma link C++ class nanotec::NanotecMotor;
+#pragma link C++ class nanotec::NanotecStatus;
+
+#pragma link C++ class WKThermalChamber;
 
 #endif
