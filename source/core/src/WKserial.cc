@@ -11,15 +11,12 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <thread>
 
 #include "WKserial.hh"
 
 WKserial::WKserial(std::string name):
-  fd(0),devname(name), endline("\n"),
-  write_interval_msec(0), read_timeout_msec(0),
-  init_connect_time({0,0}),
-  last_write_time({0,0})
-{
+  m_fd(0),m_devname(name), m_endline("\n"){
   
 }
 
@@ -29,51 +26,51 @@ WKserial::~WKserial(){
 
 
 int WKserial::get_fd(){
-  return fd;
+  return m_fd;
 }
 
 
 
 int WKserial::connect()
 {
-  fd = open( devname.c_str(), O_RDWR | O_NOCTTY); //O_NDELAY
-  if (fd==-1){
-    fprintf(stderr,"[WKserial] Error %s:  Can't Open Serial Port! \n", devname.c_str());
+  m_fd = open( m_devname.c_str(), O_RDWR | O_NOCTTY); //O_NDELAY
+  if (m_fd==-1){
+    fprintf(stderr,"[WKserial] Error %s:  Can't Open Serial Port! \n", m_devname.c_str());
     return -1;
   }
   struct termios  options;
-  tcgetattr(fd, &options);
+  tcgetattr(m_fd, &options);
   options.c_cc[VTIME] = 1; /* seconds, TODO*/
   options.c_cc[VMIN] = 0;  
-  tcflush(fd,TCIOFLUSH);
-  tcsetattr(fd, TCSANOW, &options);
+  tcflush(m_fd,TCIOFLUSH);
+  tcsetattr(m_fd, TCSANOW, &options);
 
-  clock_gettime(CLOCK_REALTIME, &init_connect_time);
-  return fd;
+  m_tp_connect=std::chrono::steady_clock::now();
+  return m_fd;
 }
 
 
 void WKserial::disconnect(){
-  if(fd!=0){
-    close(fd);
+  if(m_fd!=0){
+    close(m_fd);
   }
-  fd=0;
+  m_fd=0;
 }
 
 
 void WKserial::set_write_interval_msec(int msec){
-  write_interval_msec = msec;
+  m_du_interval_write = std::chrono::milliseconds(msec);
   return;
 }
 
 void WKserial::set_read_timeout_msec(int msec){
-  read_timeout_msec = msec;
+  m_du_timeout_read = std::chrono::milliseconds(msec);
   return;
 }
 
 
 void WKserial::set_endline(std::string el){
-  endline = el;
+  m_endline = el;
 }
 
 void WKserial::set_speed(int speed){
@@ -91,18 +88,18 @@ void WKserial::set_speed(int speed){
   
   int   status; 
   struct termios   options;
-  tcgetattr(fd, &options); 
+  tcgetattr(m_fd, &options); 
   for(unsigned int i= 0;  i < sizeof(speed_arr) / sizeof(int);  i++) { 
     if(speed == name_arr[i]) {
-      tcflush(fd, TCIOFLUSH);
+      tcflush(m_fd, TCIOFLUSH);
       cfsetispeed(&options, speed_arr[i]);  
       cfsetospeed(&options, speed_arr[i]);   
-      status = tcsetattr(fd, TCSANOW, &options);  
+      status = tcsetattr(m_fd, TCSANOW, &options);  
       if(status != 0) {        
-	fprintf(stderr,"[WKserial] Error %s:  tcsetattr fd1\n", devname.c_str());  
+	fprintf(stderr,"[WKserial] Error %s:  tcsetattr fd1\n", m_devname.c_str());  
         return;     
       }
-      tcflush(fd,TCIOFLUSH);   
+      tcflush(m_fd,TCIOFLUSH);   
     }  
   }
 }
@@ -121,7 +118,7 @@ int WKserial::get_speed(){
     2500000, 3000000, 3500000, 4000000,};
   
   struct termios   options;
-  tcgetattr(fd, &options);
+  tcgetattr(m_fd, &options);
   int speed = cfgetispeed(&options);
   int name = 0;
   for(unsigned int i= 0;  i < sizeof(speed_arr) / sizeof(int);  i++) { 
@@ -136,46 +133,46 @@ int WKserial::get_speed(){
 void WKserial::set_hardware_flow_control(int ison){
   // RS-232 signal lines CTS/RTS 
   struct termios   options;
-  tcgetattr(fd, &options); 
+  tcgetattr(m_fd, &options); 
   if(ison==0){                    //CRTSCTS also called  CNEW_RTSCTS;
     options.c_cflag &= ~CRTSCTS;   //disable hard
   }
   else{
     options.c_cflag |= CRTSCTS;    //enable hard
   }
-  tcflush(fd,TCIOFLUSH);   
-  tcsetattr(fd, TCSANOW, &options);
+  tcflush(m_fd,TCIOFLUSH);   
+  tcsetattr(m_fd, TCSANOW, &options);
 }
 
 void WKserial::set_software_flow_control(int ison){
   struct termios   options;
-  tcgetattr(fd, &options); 
+  tcgetattr(m_fd, &options); 
   if(ison==0){
     options.c_iflag &= ~(IXON | IXOFF | IXANY);  //disable soft
   }
   else{
     options.c_iflag |= (IXON | IXOFF | IXANY);  //enable soft
   }
-  tcflush(fd,TCIOFLUSH);   
-  tcsetattr(fd, TCSANOW, &options);
+  tcflush(m_fd,TCIOFLUSH);   
+  tcsetattr(m_fd, TCSANOW, &options);
 }
 
 void WKserial::set_raw_output(int israw){
   struct termios   options;
-  tcgetattr(fd, &options); 
+  tcgetattr(m_fd, &options); 
   if(israw==0){
     options.c_oflag |= OPOST;   // processed output
   }
   else{
     options.c_oflag &= ~OPOST;  // raw output, all other option bits in c_oflag are ignored
   }
-  tcflush(fd,TCIOFLUSH);
-  tcsetattr(fd, TCSANOW, &options);
+  tcflush(m_fd,TCIOFLUSH);
+  tcsetattr(m_fd, TCSANOW, &options);
 }
 
 void WKserial::set_raw_intput(int israw){
   struct termios   options;
-  tcgetattr(fd, &options); 
+  tcgetattr(m_fd, &options); 
   if(israw==0){
     options.c_lflag |= (ICANON | ECHO | ECHOE);
     //Canonical input is line-oriented.
@@ -186,14 +183,14 @@ void WKserial::set_raw_intput(int israw){
     options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
     //raw input, input characters are passed through exactly as they are received
   }
-  tcflush(fd,TCIOFLUSH);
-  tcsetattr(fd, TCSANOW, &options);
+  tcflush(m_fd,TCIOFLUSH);
+  tcsetattr(m_fd, TCSANOW, &options);
 }
 
 void WKserial::set_parity(int databits,int stopbits,int parity){ 
   struct termios options;
-  if(tcgetattr( fd,&options)  !=  0) { 
-    fprintf(stderr,"[WKserial] Error %s:  SetupSerial 1\n", devname.c_str());
+  if(tcgetattr( m_fd,&options)  !=  0) { 
+    fprintf(stderr,"[WKserial] Error %s:  SetupSerial 1\n", m_devname.c_str());
     return;  
   }
   //Enable the receiver and set local mode...
@@ -209,7 +206,7 @@ void WKserial::set_parity(int databits,int stopbits,int parity){
       options.c_cflag |= CS8;
       break;   
     default:    
-      fprintf(stderr,"[WKserial] Error %s:  Unsupported data size\n", devname.c_str());
+      fprintf(stderr,"[WKserial] Error %s:  Unsupported data size\n", m_devname.c_str());
       return;  
     }
   switch (parity) 
@@ -234,7 +231,7 @@ void WKserial::set_parity(int databits,int stopbits,int parity){
       options.c_iflag |= ISTRIP;
       break;
     default:   
-      fprintf(stderr,"[WKserial] Error %s:  Unsupported parity\n", devname.c_str());    
+      fprintf(stderr,"[WKserial] Error %s:  Unsupported parity\n", m_devname.c_str());    
       return;  
     }  
   switch (stopbits)
@@ -246,14 +243,14 @@ void WKserial::set_parity(int databits,int stopbits,int parity){
       options.c_cflag |= CSTOPB;  
       break;
     default:    
-      fprintf(stderr,"[WKserial] Error %s:  Unsupported stop bits\n", devname.c_str());  
+      fprintf(stderr,"[WKserial] Error %s:  Unsupported stop bits\n", m_devname.c_str());  
       return; 
     } 
   
-  tcflush(fd,TCIFLUSH);
-  if (tcsetattr(fd,TCSANOW,&options) != 0)   
+  tcflush(m_fd,TCIFLUSH);
+  if (tcsetattr(m_fd,TCSANOW,&options) != 0)   
     { 
-      fprintf(stderr,"[WKserial] Error %s:  SetupSerial 3\n", devname.c_str());
+      fprintf(stderr,"[WKserial] Error %s:  SetupSerial 3\n", m_devname.c_str());
       return;  
     } 
   return;  
@@ -261,55 +258,38 @@ void WKserial::set_parity(int databits,int stopbits,int parity){
 
 
 void WKserial::write_data(std::string data)
-{
-  
-  timespec now;
-  clock_gettime(CLOCK_REALTIME, &now);
-
-  long long elapse_msec = 1000*(now.tv_sec-last_write_time.tv_sec)
-    + (now.tv_nsec-last_write_time.tv_nsec)/1000000;
-  
-  if(elapse_msec < write_interval_msec){
-    fprintf(stdout,"[WKserial] debug %s: write delay %lld ms\n",devname.c_str(),
-    	    write_interval_msec-elapse_msec);
-    usleep(1000*(write_interval_msec-elapse_msec));
+{  
+  auto tp_wait = m_tp_last_write + m_du_interval_write;
+  if(tp_wait > std::chrono::steady_clock::now()){
+    fprintf(stdout,"[WKserial] debug %s: write delay\n",m_devname.c_str());    
+    std::this_thread::sleep_until(tp_wait);
   }
-  printf("[WKserial] Write %s:  %lu bytes: %s\n", devname.c_str(), data.length(), data.c_str()); 
-  write(fd, data.c_str(), data.length());
-  clock_gettime(CLOCK_REALTIME, &last_write_time);
+  printf("[WKserial] Write %s:  %lu bytes: %s\n", m_devname.c_str(), data.length(),data.c_str()); 
+  write(m_fd, data.c_str(), data.length());
+  m_tp_last_write = std::chrono::steady_clock::now();
 }
 
 void WKserial::write_line(std::string line)
 {
-  write_data(line+endline);
+  write_data(line+m_endline);
 }
 
 void WKserial::read_data(std::string &str, int length){
-  
+  str.clear();
   while(1){
     int length_waiting1, length_waiting2;
-    ioctl(fd, FIONREAD, &length_waiting1);
-    usleep(10000 + 1000000*100/get_speed());  //10ms + ~10bytes
-    ioctl(fd, FIONREAD, &length_waiting2);
+    ioctl(m_fd, FIONREAD, &length_waiting1);
+    std::this_thread::sleep_for(std::chrono::milliseconds(10 + 1000*100/get_speed()));
+    //10ms + ~10bytes
+    ioctl(m_fd, FIONREAD, &length_waiting2);
     if(length_waiting2 == 0){
-      timespec now, last;
-      clock_gettime(CLOCK_REALTIME, &now);
-      
-      if(last_write_time.tv_sec == 0)
-	last = init_connect_time;
-      else
-	last = last_write_time;
-      long long elapse_msec = 1000*(now.tv_sec-last.tv_sec)
-	+ (now.tv_nsec-last.tv_nsec)/1000000;
-      
-      if(elapse_msec < read_timeout_msec) 
+      auto tp_wait = std::max(m_tp_connect, m_tp_last_write) + m_du_timeout_read;
+      if(tp_wait > std::chrono::steady_clock::now()){
 	continue; //waiting
+      }
       else{ //timeout
-	str.clear();
 	fprintf(stderr,"[WKserial] error %s: Can not read from device! Check the device power, connection or increase the read_timeout_msec!\n",
-		devname.c_str());
-	// fprintf(stderr,"\n Exit..... \n");
-	// exit(-1);
+		m_devname.c_str());
 	return;
       }
     }
@@ -318,14 +298,12 @@ void WKserial::read_data(std::string &str, int length){
   }
   
   char *buffer = new char[length];  
-  int actual_len = read(fd, buffer, length);
-  str.clear();
+  int actual_len = read(m_fd, buffer, length);
   str.append(buffer, actual_len);
-  printf("[WKserial] Read %s:  %d bytes: %s", devname.c_str(), actual_len, str.c_str());
+  printf("[WKserial] Read %s:  %d bytes: %s", m_devname.c_str(), actual_len, str.c_str());
   delete []buffer;
  
 }
-
 
 
 //// SCPI functions
@@ -350,7 +328,7 @@ void WKserial::scpi_get_idn(std::string &idndata){
 void WKserial::scpi_print_idn(){
   std::string idndata;
   scpi_get_idn(idndata);
-  std::cout<<"[SCPI] IDN data in "<<devname<<" is:  "
+  std::cout<<"[SCPI] IDN data in "<<m_devname<<" is:  "
 	   <<idndata.length()<<" bytes"<<std::endl
 	   <<idndata<<std::endl;
 }

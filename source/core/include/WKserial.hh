@@ -4,7 +4,8 @@
 #include <string>
 #include <vector>
 
-#include <time.h>
+#include <chrono>
+#include <ctime>
 
 class WKserial{
 
@@ -42,16 +43,14 @@ public:
   unsigned int scpi_obtain_uint_value();
   void scpi_obtain_double_vector(std::vector<double> &dvec);
 
-  // WKserial(int){};
-
 private:
-  int fd;
-  std::string devname;
-  std::string endline;
-  int write_interval_msec;
-  int read_timeout_msec;
-  struct timespec init_connect_time;
-  struct timespec last_write_time;
+  int m_fd;
+  std::string m_devname;
+  std::string m_endline;
+  std::chrono::milliseconds m_du_interval_write; 
+  std::chrono::milliseconds m_du_timeout_read;
+  std::chrono::steady_clock::time_point m_tp_connect;
+  std::chrono::steady_clock::time_point m_tp_last_write;
 };
 
 #endif
