@@ -10,11 +10,11 @@
 class WKThermalChamber{
 public:
   WKThermalChamber(){};
-  void Init(uint32_t d0, uint32_t d1, uint32_t d2);
-  void FindReferencePostion();
-  void MoveToPostion(int32_t x, int32_t y);
+  void Init();
+  void MoveToPositionX(int x);
+  void MoveToPositionY(int y);
+  void MoveToPosition(int x, int y);
   void TakePhoto();
-
   
   std::unique_ptr<nanotec::NanotecMotor> m_mx, m_my;
   std::unique_ptr<CameraIR> m_ir;

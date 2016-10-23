@@ -129,17 +129,15 @@ namespace nanotec
       Exception(const char* msg) : std::runtime_error(msg) {}
     };
   
-    typedef struct _NanotecStatus
-    {
+    struct NanotecStatus{
         bool controller_ready;
         bool zero_position_reached;
         bool position_error;
         bool input_1;
 
-    } NanotecStatus;
+    };
 
-    typedef struct _NanotecIOPolarity
-    {
+    struct NanotecIOPolarity{
         bool input_1;
         bool input_2;
         bool input_3;
@@ -160,10 +158,9 @@ namespace nanotec
 
         bool ballast_resistance;
 
-    } NanotecIOPolarity;
+    };
 
-    typedef struct _NanotecOutputs
-    {
+    struct NanotecOutputs{
         bool output_1;
         bool output_2;
         bool output_3;
@@ -173,10 +170,9 @@ namespace nanotec
         bool output_7;
         bool output_8;
 
-    } NanotecOutputs;
+    };
 
-    typedef struct _NanotecInputs
-    {
+    struct NanotecInputs{
         bool input_1;
         bool input_2;
         bool input_3;
@@ -188,10 +184,9 @@ namespace nanotec
 
         bool encoder_index;
 
-    } NanotecInputs;
+    };
 
-    typedef struct _NanotecRecord
-    {
+    struct NanotecRecord{
         int position_mode;
         int travel_distance;
         int initial_step_frequency;
@@ -207,7 +202,7 @@ namespace nanotec
         int maximum_jerk_for_acceleration_ramp;
         int maximum_jerk_for_brake_ramp;
 
-    } NanotecRecord;
+    };
 
     /*! \class Nanotec nanotec.h "inc/nanotec.h"
      *  \brief Nanotec motor controllers communication class for ROS.
@@ -1584,10 +1579,13 @@ namespace nanotec
         */
         int getInterpolationTimePeriod();
 
+
+    
     bool isStatusReady();
     bool isStatusZeroPos();
     bool isStatusErrorPos();
-    
+
+    // bool gotoZeroPostion();
     
   private:
         bool sendCommand(std::string & message, std::string & reply);

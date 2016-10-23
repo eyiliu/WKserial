@@ -14,6 +14,8 @@
 
 #pragma link C++ class nanotec::NanotecMotor;
 #pragma link C++ class nanotec::NanotecStatus;
+#pragma link C++ class nanotec::NanotecInputs;
+
 
 #pragma link C++ class WKThermalChamber;
 

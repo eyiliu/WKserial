@@ -927,4 +927,7 @@ bool nanotec::NanotecMotor::isStatusErrorPos(){
 }
 
 
+
+
+
 // EOF
