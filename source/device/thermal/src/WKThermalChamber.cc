@@ -8,8 +8,8 @@
 
 void WKThermalChamber::Init(){
 
-  const std::string mx_path = "/dev/motory";
-  const std::string my_path = "/dev/motorx";
+  const std::string mx_path = "/dev/motorx";
+  const std::string my_path = "/dev/motory";
   const std::string ir_path = "/dev/ircamera";
 
   if(!access(mx_path.c_str(), R_OK|W_OK)){
@@ -38,16 +38,19 @@ void WKThermalChamber::Init(){
       std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
   }
+  m_mx->setPositionMode(2);//abs
+
   
   if(!access(my_path.c_str(), R_OK|W_OK)){
     m_my.reset(new nanotec::NanotecMotor(my_path));
     m_my->setTravelDistance(0);
     int posy = m_my->getTravelDistance();
     m_my->setLimitSwitchBehaviour(2,8,1,2);//ext_ref_fwd
-    m_my->setPositionMode(4);//ext_ref
+    m_my->setMaximumFrequency(200);
     m_my->setDirection(1);
     m_my->setRampType(2);
     if(!m_my->motorIsReferenced()){
+      std::cout<<"--------------------------------is not refer\n";
       m_my->setPositionMode(4);//ext_ref
       m_my->setTravelDistance(0);
       posy = m_my->getTravelDistance();
@@ -65,6 +68,8 @@ void WKThermalChamber::Init(){
       std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
   }
+  m_my->setPositionMode(2);//abs
+
   
   if(!access(ir_path.c_str(), R_OK|W_OK)){
     m_ir.reset(new CameraIR(ir_path));
@@ -73,12 +78,13 @@ void WKThermalChamber::Init(){
 
 
 void WKThermalChamber::MoveToPositionX(int x){
-  m_mx->setTravelDistance(x);
+  int pos = std::min(x, 4300); //soft limiter
+  m_mx->setTravelDistance(pos);
   m_mx->startMotor();
   while(!m_mx->isStatusReady()){
     if(m_mx->isStatusErrorPos()){
       m_mx->resetPositionError();
-      m_mx->setTravelDistance(x);
+      m_mx->setTravelDistance(pos);
       m_mx->startMotor();
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -87,12 +93,13 @@ void WKThermalChamber::MoveToPositionX(int x){
 
 
 void WKThermalChamber::MoveToPositionY(int y){
-  m_my->setTravelDistance(y);
+  int pos = std::min(y, 1100); //soft limiter
+  m_my->setTravelDistance(pos);
   m_my->startMotor();
   while(!m_my->isStatusReady()){
     if(m_my->isStatusErrorPos()){
       m_my->resetPositionError();
-      m_my->setTravelDistance(y);
+      m_my->setTravelDistance(pos);
       m_my->startMotor();
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
