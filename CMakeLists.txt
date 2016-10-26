@@ -5,7 +5,7 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake )
 
 
 if(CMAKE_COMPILER_IS_GNUCC)
-   list(APPEND CMAKE_CXX_FLAGS "-fPIC" )
+   list(APPEND CMAKE_CXX_FLAGS "-fPIC -std=c++11" )
    list(APPEND CMAKE_LD_FLAGS "-fPIC" )
 endif()
 
