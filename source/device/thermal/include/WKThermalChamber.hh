@@ -5,11 +5,11 @@
 #include "CameraIR.hh"
 
 #include <memory>
-
+#include <iostream>
 
 class WKThermalChamber{
 public:
-  WKThermalChamber(){};
+  WKThermalChamber();
   void Init();
   void MoveToPositionX(int x);
   void MoveToPositionY(int y);

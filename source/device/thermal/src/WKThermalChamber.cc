@@ -6,6 +6,9 @@
 
 #include <unistd.h>
 
+WKThermalChamber::WKThermalChamber(){
+}
+
 void WKThermalChamber::Init(){
 
   const std::string mx_path = "/dev/motorx";
@@ -38,7 +41,8 @@ void WKThermalChamber::Init(){
       std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
   }
-  m_mx->setPositionMode(2);//abs
+  if(m_mx)
+    m_mx->setPositionMode(2);//abs
 
   
   if(!access(my_path.c_str(), R_OK|W_OK)){
@@ -68,8 +72,8 @@ void WKThermalChamber::Init(){
       std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
   }
-  m_my->setPositionMode(2);//abs
-
+  if(m_my)
+    m_my->setPositionMode(2);//abs
   
   if(!access(ir_path.c_str(), R_OK|W_OK)){
     m_ir.reset(new CameraIR(ir_path));
@@ -78,6 +82,11 @@ void WKThermalChamber::Init(){
 
 
 void WKThermalChamber::MoveToPositionX(int x){
+  if(!m_mx->motorIsReferenced()){
+    std::cout<<"Please init motor x firstly\n";
+    return;
+  }
+  
   int pos = std::min(x, 4300); //soft limiter
   m_mx->setTravelDistance(pos);
   m_mx->startMotor();
@@ -93,6 +102,11 @@ void WKThermalChamber::MoveToPositionX(int x){
 
 
 void WKThermalChamber::MoveToPositionY(int y){
+  if(!m_my->motorIsReferenced()){
+    std::cout<<"Please init motor y firstly\n";
+    return;
+  }
+
   int pos = std::min(y, 1100); //soft limiter
   m_my->setTravelDistance(pos);
   m_my->startMotor();
