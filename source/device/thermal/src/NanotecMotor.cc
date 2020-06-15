@@ -423,7 +423,7 @@ int nanotec::NanotecMotor::getDigitalOutputFunction(char output)
         NANOTEC_EXCEPT(nanotec::Exception, "Output is out of bounds: %c. %s (errno = %d).", output, strerror(errno), errno);
 
     std::string command = ":port_out_" + output;
-    getter(command);
+    return getter(command);
 }
 
 void nanotec::NanotecMotor::setIOPolarityReversal(nanotec::NanotecIOPolarity & polarity_reversal)
