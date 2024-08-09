@@ -24,9 +24,7 @@ install(
   ARCHIVE DESTINATION lib
   )
 
-IF(${ROOT_VERSION_MAJOR} GREATER 5)
-  install(
+install(
   FILES ${LIB_DICT_PCM} ${LIB_DICT_MAP} 
   DESTINATION lib
   )
-endif()
